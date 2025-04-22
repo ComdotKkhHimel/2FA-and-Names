@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is My IP Address & IP Unblock Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 0.375rem;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .custom-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        }
+        .highlight-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+        }
+        .warning-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #f59e0b;
+        }
+        @media (max-width: 640px) {
+            .tab-buttons {
+                flex-direction: column;
+            }
+            .tab-button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="custom-gradient text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold text-center">What Is My IP Address & IP Unblock Tool</h1>
+            <p class="text-center mt-2 text-blue-100">View your IP information and unblock blocked IP addresses</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6">
+        <!-- Tab Buttons -->
+        <div class="tab-buttons flex mb-6 space-x-2 sm:space-x-4">
+            <button id="tab-ip-info" class="tab-button flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow transition duration-200 active">
+                <i class="fas fa-info-circle mr-2"></i> IP Information
+            </button>
+            <button id="tab-ip-unblock" class="tab-button flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 px-4 rounded-lg shadow transition duration-200">
+                <i class="fas fa-unlock-alt mr-2"></i> IP Unblock Tool
+            </button>
+        </div>
+
+        <!-- IP Information Tab Content -->
+        <div id="content-ip-info" class="tab-content active">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your IP Address</h2>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                    <div class="flex flex-wrap items-center">
+                        <div class="w-full md:w-1/2 mb-4 md:mb-0">
+                            <h3 class="text-gray-500 text-sm uppercase font-semibold mb-1">IPv4 Address</h3>
+                            <p id="ip-address" class="text-4xl font-bold text-blue-600">203.0.113.42</p>
+                            <p class="text-sm text-gray-600 mt-1">Attempting to detect your IP...</p>
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <h3 class="text-gray-500 text-sm uppercase font-semibold mb-1">Location</h3>
+                            <p id="ip-location" class="text-xl font-semibold text-gray-800">New York, United States</p>
+                            <p id="ip-coords" class="text-sm text-gray-600">Latitude: 40.7128, Longitude: -74.0060</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 custom-shadow">
+                        <h3 class="text-gray-500 text-sm uppercase font-semibold mb-2">ISP</h3>
+                        <p id="ip-isp" class="font-semibold text-gray-800">Example Internet Service Provider</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 custom-shadow">
+                        <h3 class="text-gray-500 text-sm uppercase font-semibold mb-2">Organization</h3>
+                        <p id="ip-org" class="font-semibold text-gray-800">Example Organization</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 custom-shadow">
+                        <h3 class="text-gray-500 text-sm uppercase font-semibold mb-2">Network</h3>
+                        <p id="ip-network" class="font-semibold text-gray-800">203.0.113.0/24</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 custom-shadow">
+                        <h3 class="text-gray-500 text-sm uppercase font-semibold mb-2">Timezone</h3>
+                        <p id="ip-timezone" class="font-semibold text-gray-800">America/New_York</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Your Location</h3>
+                    <div id="map" class="custom-shadow"></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Frequently Asked Questions</h2>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">What is an IP address?</h3>
+                    <p class="text-gray-700 mb-2">Your IP address is a unique numerical label assigned to your device when it connects to the internet. Think of it as your digital return address that enables you to send and receive data over the internet.</p>
+                    <p class="text-gray-700">Whether you're checking emails, shopping, or chatting online, your IP address works tirelessly behind the scenes, allowing websites to know where to send the information you request.</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Why does my IP address matter?</h3>
+                    <p class="text-gray-700 mb-2">Your IP address plays several important roles:</p>
+                    <ul class="list-disc ml-6 text-gray-700 space-y-1">
+                        <li>It allows websites and online services to send information back to your device</li>
+                        <li>It can reveal your approximate geographical location</li>
+                        <li>It's used by some services to verify your identity or restrict content</li>
+                        <li>It can be tracked by websites to remember your preferences</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box p-4 rounded-lg mb-6">
+                    <h3 class="text-xl font-semibold text-blue-800 mb-2">Should I change my IP address?</h3>
+                    <p class="text-gray-700 mb-2">Changing your IP address can be beneficial for several reasons:</p>
+                    <ul class="list-disc ml-6 text-gray-700 space-y-1">
+                        <li><strong>Enhanced Privacy:</strong> Hide your online activities from websites and your ISP</li>
+                        <li><strong>Access Restricted Content:</strong> Bypass geo-restrictions on websites and services</li>
+                        <li><strong>Avoid Tracking:</strong> Prevent websites from building a profile based on your IP</li>
+                        <li><strong>Security:</strong> Protect yourself when using public Wi-Fi networks</li>
+                    </ul>
+                    <p class="text-gray-700 mt-2">You can change your IP address using VPN services, proxy servers, or by reconnecting to your network with a new dynamic IP.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- IP Unblock Tool Tab Content -->
+        <div id="content-ip-unblock" class="tab-content">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">IP Unblock Tool</h2>
+                <p class="text-gray-700 mb-4">Use this tool to request unblocking of your IP address if it has been inadvertently blocked by our services.</p>
+                
+                <div class="mb-6">
+                    <form id="unblock-form" class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <div class="mb-4">
+                            <label for="blocked-ip" class="block text-gray-700 font-semibold mb-2">Enter the blocked IP address:</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="blocked-ip" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 203.0.113.42">
+                                <button type="button" id="use-current-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition duration-200">
+                                    Use Current
+                                </button>
+                            </div>
+                            <p id="ip-validation-message" class="hidden text-red-500 text-sm mt-1">Please enter a valid IP address</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="block text-gray-700 font-semibold mb-2">Email address (optional):</label>
+                            <input type="email" id="email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+                            <p class="text-gray-500 text-sm mt-1">We'll notify you when your IP is unblocked</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="reason" class="block text-gray-700 font-semibold mb-2">Reason for unblocking:</label>
+                            <select id="reason" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select a reason...</option>
+                                <option value="false_positive">I believe my IP was incorrectly blocked</option>
+                                <option value="hosting">I'm on a shared hosting service</option>
+                                <option value="vpn">I'm using a VPN service</option>
+                                <option value="other">Other reason</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="details" class="block text-gray-700 font-semibold mb-2">Additional details:</label>
+                            <textarea id="details" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Please provide any additional context..."></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button type="submit" id="submit-unblock" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                                Submit Unblock Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="submission-success" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 text-xl mr-2"></i>
+                        <p class="text-green-700 font-semibold">Your IP unblock request has been submitted successfully. We'll process it shortly.</p>
+                    </div>
+                </div>
+                
+                <div id="submission-error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 text-xl mr-2"></i>
+                        <p class="text-red-700 font-semibold">There was an error submitting your request. Please try again later.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Why was my IP blocked?</h2>
+                
+                <div class="mb-6">
+                    <p class="text-gray-700 mb-3">There are several reasons why your IP address might have been blocked:</p>
+                    
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Shared Server with Compromised Websites</h3>
+                    <p class="text-gray-700 mb-3">Your IP address might be sharing a web server with hacked websites. When multiple websites are hosted on the same server, and one is compromised, it can affect the entire server and all IP addresses associated with it.</p>
+                    
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Automated Security Measures</h3>
+                    <p class="text-gray-700 mb-3">Many online services use automated security measures to protect against attacks. These systems identify and block suspicious or potentially harmful behavior, sometimes mistakenly blocking legitimate users.</p>
+                    
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Too Many Requests</h3>
+                    <p class="text-gray-700 mb-3">Making too many requests in a short period may trigger anti-DDoS security measures. If your activity accidentally mimics a DoS attack, you might get temporarily blocked.</p>
+                    
+                    <div class="warning-box p-4 rounded-lg mb-4">
+                        <p class="text-orange-800 font-semibold">Note:</p>
+                        <p class="text-gray-700">If you're concerned about your server being compromised, you should contact your web hosting company for further investigation.</p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Still having trouble?</h3>
+                    <p class="text-gray-700">If the unblock tool doesn't resolve the issue, your computer might be infected with malware. We recommend running a thorough virus scan with reputable security software.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">For more information</h3>
+                    <p class="text-gray-700">For a full explanation of IP blocking and how to address it, read our <a href="#" class="text-blue-600 hover:underline">IP Unblock Guide</a>.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p>&copy; 2025 IP Manager Tool. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-blue-300 hover:text-blue-100 transition duration-200">Privacy Policy</a>
+                    <a href="#" class="text-blue-300 hover:text-blue-100 transition duration-200">Terms of Service</a>
+                    <a href="#" class="text-blue-300 hover:text-blue-100 transition duration-200">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Default coordinates (New York City)
+        let defaultLat = 40.7128;
+        let defaultLng = -74.0060;
+        let map;
+        let marker;
+        let currentIP = "203.0.113.42";
+
+        // Initialize map with default location
+        function initMap(lat, lng) {
+            if (map) {
+                map.remove();
+            }
+            
+            map = L.map('map').setView([lat, lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup('Your approximate location')
+                .openPopup();
+        }
+
+        // Initialize default map on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap(defaultLat, defaultLng);
+
+            // Fetch real IP address
+            fetchIPAddress();
+
+            // Setup tab switching
+            setupTabs();
+
+            // Setup form validation and submission
+            setupForm();
+        });
+
+        // Fetch real IP address
+        function fetchIPAddress() {
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    currentIP = data.ip;
+                    document.getElementById('ip-address').textContent = data.ip;
+                    
+                    // Now fetch location data for this IP
+                    return fetch(`https://ipapi.co/${data.ip}/json/`);
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        // If there's an error, we'll keep the default data
+                        return;
+                    }
+                    
+                    // Update IP location info
+                    const locationText = `${data.city || 'Unknown'}, ${data.country_name || 'Unknown'}`;
+                    document.getElementById('ip-location').textContent = locationText;
+                    
+                    if (data.latitude && data.longitude) {
+                        document.getElementById('ip-coords').textContent = `Latitude: ${data.latitude}, Longitude: ${data.longitude}`;
+                        initMap(data.latitude, data.longitude);
+                    }
+                    
+                    // Update additional IP details
+                    if (data.org) document.getElementById('ip-isp').textContent = data.org;
+                    if (data.asn) document.getElementById('ip-org').textContent = `AS${data.asn}`;
+                    if (data.network) document.getElementById('ip-network').textContent = data.network;
+                    if (data.timezone) document.getElementById('ip-timezone').textContent = data.timezone;
+                })
+                .catch(error => {
+                    console.error('Error fetching IP data:', error);
+                    // Keep default values on error
+                });
+        }
+
+        // Setup tabs
+        function setupTabs() {
+            const tabs = {
+                'tab-ip-info': 'content-ip-info',
+                'tab-ip-unblock': 'content-ip-unblock'
+            };
+            
+            for (const tabId in tabs) {
+                document.getElementById(tabId).addEventListener('click', function() {
+                    // Update tab buttons
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                        btn.classList.add('bg-gray-300', 'hover:bg-gray-400', 'text-gray-700');
+                        btn.classList.remove('active');
+                    });
+                    
+                    this.classList.remove('bg-gray-300', 'hover:bg-gray-400', 'text-gray-700');
+                    this.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'active');
+                    
+                    // Update tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    document.getElementById(tabs[tabId]).classList.add('active');
+                    
+                    // Update URL hash
+                    window.location.hash = tabId === 'tab-ip-info' ? '' : 'ip-unblock';
+                });
+            }
+            
+            // Handle direct links with hash
+            if (window.location.hash === '#ip-unblock') {
+                document.getElementById('tab-ip-unblock').click();
+            }
+        }
+
+        // Setup form validation and submission
+        function setupForm() {
+            const unblockForm = document.getElementById('unblock-form');
+            const blockedIpInput = document.getElementById('blocked-ip');
+            const useCurrentBtn = document.getElementById('use-current-btn');
+            const validationMessage = document.getElementById('ip-validation-message');
+            const successMessage = document.getElementById('submission-success');
+            const errorMessage = document.getElementById('submission-error');
+            
+            // Use current IP button
+            useCurrentBtn.addEventListener('click', function() {
+                blockedIpInput.value = currentIP;
+                validationMessage.classList.add('hidden');
+            });
+            
+            // Validate IP format
+            function isValidIP(ip) {
+                const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                return ipPattern.test(ip);
+            }
+            
+            // Form submission
+            unblockForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const ipAddress = blockedIpInput.value.trim();
+                
+                // Validate IP address
+                if (!isValidIP(ipAddress)) {
+                    validationMessage.classList.remove('hidden');
+                    return;
+                }
+                
+                validationMessage.classList.add('hidden');
+                
+                // Simulate form submission (in a real app, this would be an API call)
+                setTimeout(function() {
+                    // 90% chance of success for demo purposes
+                    if (Math.random() < 0.9) {
+                        successMessage.classList.remove('hidden');
+                        errorMessage.classList.add('hidden');
+                        unblockForm.reset();
+                    } else {
+                        errorMessage.classList.remove('hidden');
+                        successMessage.classList.add('hidden');
+                    }
+                    
+                    // Hide messages after 5 seconds
+                    setTimeout(function() {
+                        successMessage.classList.add('hidden');
+                        errorMessage.classList.add('hidden');
+                    }, 5000);
+                }, 1000);
+            });
+            
+            // Validate as user types
+            blockedIpInput.addEventListener('input', function() {
+                if (this.value.trim() !== '' && !isValidIP(this.value.trim())) {
+                    validationMessage.classList.remove('hidden');
+                } else {
+                    validationMessage.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
