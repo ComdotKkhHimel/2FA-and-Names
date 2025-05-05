@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Name Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1200 0%, #3a2e00 50%, #1a1200 100%);
+            padding: 20px;
+            min-height: 100vh;
+            color: #FFD700;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(26, 18, 0, 0.7);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 32px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(to right, #FFD700, #FFEC8B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(to right, #FFD700, #FFC000);
+            color: #1a1200;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+        }
+        
+        .name-box {
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            padding: 40px;
+            margin: 40px 0;
+            font-size: 28px;
+            background: rgba(26, 18, 0, 0.5);
+            border-radius: 8px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(to bottom, #FFD700, #FFC000);
+            color: #1a1200;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(255, 215, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: #FFD700;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: rgba(255, 215, 0, 0.7);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Random Names Generator</h1>
+            <a href="2fa-generator.html" class="nav-btn">2FA Generator</a>
+        </header>
+        
+        <div id="generatedNameBox" class="name-box">
+            <div class="loading"></div>
+            <span>Loading names database...</span>
+        </div>
+        
+        <div class="buttons">
+            <button onclick="generateNames('male')">Male Name</button>
+            <button onclick="generateNames('female')">Female Name</button>
+            <button onclick="copyToClipboard()">Copy Name</button>
+        </div>
+        
+        <footer>
+            <p>Powered by ComDotKKH</p>
+        </footer>
+    </div>
+
+    <script>
+        // Name Generator Functionality
+        let maleNames = [];
+        let femaleNames = [];
+        let usedMaleNames = new Set();
+        let usedFemaleNames = new Set();
+        let lastName = "";
+        
+        function loadNames(file, targetArray) {
+            return fetch(file)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Failed to load ${file}`);
+                    return response.text();
+                })
+                .then(text => {
+                    targetArray.length = 0;
+                    targetArray.push(...text.trim().split('\n').filter(name => name.trim()));
+                })
+                .catch(error => {
+                    console.error('Error loading names:', error);
+                    document.getElementById('generatedNameBox').innerHTML = 
+                        `<span style="color: #ff6b6b">Error loading names</span>`;
+                });
+        }
+        
+        window.addEventListener('load', () => {
+            Promise.all([
+                loadNames('male_names.txt', maleNames),
+                loadNames('female_names.txt', femaleNames)
+            ]).then(() => {
+                if (maleNames.length > 0 && femaleNames.length > 0) {
+                    document.getElementById('generatedNameBox').textContent = "Ready to generate names!";
+                } else {
+                    document.getElementById('generatedNameBox').innerHTML = 
+                        `<span style="color: #ff6b6b">Failed to load names</span>`;
+                }
+            });
+        });
+        
+        function getUniqueName(namesArray, usedSet) {
+            if (namesArray.length === 0) return "No names available";
+            if (usedSet.size >= namesArray.length) usedSet.clear();
+            
+            let name;
+            let tries = 0;
+            do {
+                name = namesArray[Math.floor(Math.random() * namesArray.length)];
+                tries++;
+            } while (usedSet.has(name) && tries < 1000);
+            
+            usedSet.add(name);
+            return name;
+        }
+        
+        function generateNames(gender) {
+            const namesArray = gender === 'male' ? maleNames : femaleNames;
+            const usedSet = gender === 'male' ? usedMaleNames : usedFemaleNames;
+            
+            if (namesArray.length === 0) {
+                document.getElementById('generatedNameBox').innerHTML = 
+                    `<span style="color: #ff6b6b">${gender} names not loaded</span>`;
+                return;
+            }
+            
+            lastName = getUniqueName(namesArray, usedSet);
+            document.getElementById('generatedNameBox').textContent = lastName;
+        }
+        
+        function copyToClipboard() {
+            const name = document.getElementById('generatedNameBox').textContent;
+            
+            if (name.includes("Loading") || name.includes("Error") || name.includes("Ready")) return;
+            
+            navigator.clipboard.writeText(name).then(() => {
+                const copyBtn = document.querySelector('.buttons button:last-child');
+                copyBtn.textContent = "Copied!";
+                setTimeout(() => copyBtn.textContent = "Copy Name", 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                const copyBtn = document.querySelector('.buttons button:last-child');
+                copyBtn.textContent = "Copy Failed";
+                setTimeout(() => copyBtn.textContent = "Copy Name", 2000);
+            });
+        }
+    </script>
+</body>
+</html>
