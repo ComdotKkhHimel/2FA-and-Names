@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComDotKKH - Security Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --dark-green: #003b00;
+            --darker-green: #001a00;
+            --glow: 0 0 10px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: black;
+            background-image: 
+                radial-gradient(circle at center, var(--dark-green) 0%, black 70%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--matrix-green);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-shadow: var(--glow) var(--matrix-green);
+            letter-spacing: 3px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+        }
+        
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+        
+        .btn {
+            padding: 20px;
+            border: 2px solid var(--matrix-green);
+            background: rgba(0, 20, 0, 0.5);
+            color: var(--matrix-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: var(--glow) var(--matrix-green);
+            box-shadow: var(--glow) var(--matrix-green);
+        }
+        
+        .btn:hover {
+            background: rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 20px var(--matrix-green);
+        }
+        
+        .footer {
+            margin-top: 50px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+        
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .matrix-digit {
+            position: absolute;
+            color: var(--matrix-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            animation: matrixFall linear infinite;
+            text-shadow: var(--glow) var(--matrix-green);
+            opacity: 0.8;
+        }
+        
+        @keyframes matrixFall {
+            to { transform: translateY(100vh); }
+        }
+        
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 2em;
+            }
+            
+            .subtitle {
+                font-size: 1em;
+            }
+            
+            .btn {
+                padding: 15px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-rain" id="matrix-rain"></div>
+    
+    <div class="container">
+        <div class="logo">ComDotKKH</div>
+        <div class="subtitle">SECURITY TOOLS COLLECTION</div>
+        
+        <div class="buttons">
+            <button class="btn" onclick="window.location.href='name-generator.html'">NAME GENERATOR</button>
+            <button class="btn" onclick="window.location.href='2fa-generator.html'">2FA GENERATOR</button>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by ComDotKKH - Himel</p>
+        </div>
+    </div>
+
+    <script>
+        // Create matrix rain effect
+        function createMatrixRain() {
+            const container = document.getElementById('matrix-rain');
+            const digitCount = Math.floor(window.innerWidth / 15);
+            
+            for (let i = 0; i < digitCount; i++) {
+                const digit = document.createElement('div');
+                digit.classList.add('matrix-digit');
+                digit.textContent = Math.random() > 0.5 ? '1' : '0';
+                digit.style.left = `${Math.random() * 100}%`;
+                digit.style.top = `${Math.random() * -100}px`;
+                digit.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                digit.style.animationDelay = `${Math.random() * 5}s`;
+                
+                container.appendChild(digit);
+            }
+        }
+        
+        // Create matrix rain on load
+        window.addEventListener('load', createMatrixRain);
+    </script>
+</body>
+</html>

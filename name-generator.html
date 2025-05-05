@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Names Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --dark-green: #003b00;
+            --darker-green: #001a00;
+            --glow: 0 0 10px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: black;
+            background-image: 
+                radial-gradient(circle at center, var(--dark-green) 0%, black 70%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--matrix-green);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 2em;
+            color: var(--matrix-green);
+            text-shadow: 0 0 5px var(--matrix-green), 0 0 10px var(--matrix-green);
+            margin-bottom: 20px;
+        }
+        
+        h1::after {
+            content: "_";
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .name-box {
+            border: 2px solid var(--matrix-green);
+            padding: 20px;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 600px;
+            font-size: 1.5em;
+            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px var(--matrix-green), 0 0 20px var(--matrix-green), 0 0 30px var(--matrix-green);
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--matrix-green);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--matrix-green);
+            border: 2px solid var(--matrix-green);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            text-shadow: 0 0 5px var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green), 0 0 20px var(--matrix-green);
+            transition: background-color 0.3s;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        button:hover {
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+        
+        .footer {
+            color: var(--matrix-green);
+            text-shadow: 0 0 5px var(--matrix-green), 0 0 10px var(--matrix-green);
+            font-weight: bold;
+            margin-top: 40px;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--matrix-green);
+            border: 1px solid var(--matrix-green);
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 0 0 5px var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+        
+        .loading {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .loading div {
+            position: absolute;
+            top: 33px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--matrix-green);
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+        
+        .loading div:nth-child(1) {
+            left: 8px;
+            animation: loading1 0.6s infinite;
+        }
+        
+        .loading div:nth-child(2) {
+            left: 8px;
+            animation: loading2 0.6s infinite;
+        }
+        
+        .loading div:nth-child(3) {
+            left: 32px;
+            animation: loading2 0.6s infinite;
+        }
+        
+        .loading div:nth-child(4) {
+            left: 56px;
+            animation: loading3 0.6s infinite;
+        }
+        
+        @keyframes loading1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes loading3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+        
+        @keyframes loading2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(24px, 0); }
+        }
+        
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .matrix-digit {
+            position: absolute;
+            color: var(--matrix-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            animation: matrixFall linear infinite;
+            text-shadow: var(--glow) var(--matrix-green);
+            opacity: 0.8;
+        }
+        
+        @keyframes matrixFall {
+            to { transform: translateY(100vh); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .name-box {
+                font-size: 1.2em;
+                padding: 15px;
+            }
+            
+            button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-rain" id="matrix-rain"></div>
+    
+    <button class="back-btn" onclick="window.location.href='index.html'">← BACK</button>
+    
+    <div class="container">
+        <h1>Random Names Generator</h1>
+        <div id="generatedNameBox" class="name-box">
+            <div class="loading">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <span>Loading names database...</span>
+        </div>
+        <div class="buttons">
+            <button onclick="generateNames('male')">Generate Male Name</button>
+            <button onclick="generateNames('female')">Generate Female Name</button>
+            <button onclick="copyToClipboard()">Copy Name</button>
+        </div>
+        <div class="footer">
+            <p>Powered by ComDotKKH - Himel</p>
+        </div>
+    </div>
+
+    <script>
+        // Name Generator Functionality
+        let maleNames = [];
+        let femaleNames = [];
+        let usedMaleNames = new Set();
+        let usedFemaleNames = new Set();
+        let lastName = "";
+        
+        function loadNames(file, targetArray) {
+            return fetch(file)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${file}: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    targetArray.length = 0;
+                    targetArray.push(...text.trim().split('\n').filter(name => name.trim()));
+                })
+                .catch(error => {
+                    console.error('Error loading names:', error);
+                    document.getElementById('generatedNameBox').innerHTML = 
+                        `<span style="color: #ff5555">Error loading ${file}: ${error.message}</span>`;
+                });
+        }
+        
+        // Load names when page loads
+        window.addEventListener('load', () => {
+            createMatrixRain();
+            
+            Promise.all([
+                loadNames('male_names.txt', maleNames),
+                loadNames('female_names.txt', femaleNames)
+            ]).then(() => {
+                if (maleNames.length > 0 && femaleNames.length > 0) {
+                    document.getElementById('generatedNameBox').textContent = "Ready to generate names!";
+                } else {
+                    document.getElementById('generatedNameBox').innerHTML = 
+                        `<span style="color: #ff5555">Failed to load names. Please check the name files.</span>`;
+                }
+            });
+        });
+        
+        function getUniqueName(namesArray, usedSet) {
+            if (namesArray.length === 0) {
+                return "No names available";
+            }
+            
+            if (usedSet.size >= namesArray.length) {
+                usedSet.clear(); // Reset if all names used
+            }
+            
+            let name;
+            let tries = 0;
+            do {
+                name = namesArray[Math.floor(Math.random() * namesArray.length)];
+                tries++;
+            } while (usedSet.has(name) && tries < 1000);
+            
+            usedSet.add(name);
+            return name;
+        }
+        
+        function generateNames(gender) {
+            const namesArray = gender === 'male' ? maleNames : femaleNames;
+            const usedSet = gender === 'male' ? usedMaleNames : usedFemaleNames;
+            
+            if (namesArray.length === 0) {
+                document.getElementById('generatedNameBox').innerHTML = 
+                    `<span style="color: #ff5555">${gender} names not loaded yet. Please try again.</span>`;
+                return;
+            }
+            
+            const name = getUniqueName(namesArray, usedSet);
+            lastName = name;
+            document.getElementById('generatedNameBox').textContent = name;
+            
+            // Add animation
+            const nameBox = document.getElementById('generatedNameBox');
+            nameBox.style.animation = 'none';
+            void nameBox.offsetWidth; // Trigger reflow
+            nameBox.style.animation = 'fadeIn 0.5s';
+        }
+        
+        function copyToClipboard() {
+            const nameBox = document.getElementById('generatedNameBox');
+            const name = nameBox.textContent;
+            
+            if (name.includes("Loading") || name.includes("Error") || name.includes("Ready")) {
+                return;
+            }
+            
+            navigator.clipboard.writeText(name).then(() => {
+                const copyBtn = document.querySelector('.buttons button:last-child');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = "COPIED!";
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                const copyBtn = document.querySelector('.buttons button:last-child');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = "COPY FAILED";
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            });
+        }
+        
+        // Create matrix rain effect
+        function createMatrixRain() {
+            const container = document.getElementById('matrix-rain');
+            const digitCount = Math.floor(window.innerWidth / 15);
+            
+            for (let i = 0; i < digitCount; i++) {
+                const digit = document.createElement('div');
+                digit.classList.add('matrix-digit');
+                digit.textContent = Math.random() > 0.5 ? '1' : '0';
+                digit.style.left = `${Math.random() * 100}%`;
+                digit.style.top = `${Math.random() * -100}px`;
+                digit.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                digit.style.animationDelay = `${Math.random() * 5}s`;
+                
+                container.appendChild(digit);
+            }
+        }
+    </script>
+</body>
+</html>
